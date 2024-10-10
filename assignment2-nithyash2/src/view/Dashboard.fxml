@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane fx:id="dashboardPane" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.DashboardController">
+    <!-- Top Bar with Title -->
+    <top>
+        <ToolBar>
+            <Label fx:id="welcomeLabel" text="Welcome!" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+            <Region fx:id="spacer" />
+            <Button text="Logout" onAction="#handleLogout" />
+        </ToolBar>
+    </top>
+
+    <!-- Left Menu for Navigation -->
+    <left>
+        <VBox spacing="10" style="-fx-padding: 10;">
+            <Button text="Profile" onAction="#handleProfile" />
+            <Button text="Books" onAction="#handleBooks" />
+            <Button text="Orders" onAction="#handleOrders" />
+            <Button text="Settings" onAction="#handleSettings" />
+        </VBox>
+    </left>
+
+    <!-- Main Content Area -->
+    <center>
+        <VBox spacing="10" style="-fx-padding: 10;">
+            <!-- Section for displaying the top 5 popular books -->
+            <Label text="Top 5 Popular Books" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+            <ListView fx:id="booksListView" prefHeight="150.0" />
+
+            <!-- Section for viewing all books -->
+            <Label text="All Available Books" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+            <TableView fx:id="allBooksTable" prefHeight="250.0">
+                <columns>
+                    <TableColumn fx:id="titleColumn" text="Title" />
+                    <TableColumn fx:id="authorColumn" text="Author" />
+                    <TableColumn fx:id="priceColumn" text="Price" />
+                    <TableColumn fx:id="stockColumn" text="Stock" />
+                </columns>
+            </TableView>
+        </VBox>
+    </center>
+
+    <!-- Bottom Bar -->
+    <bottom>
+        <Label text="© 2024 Your Company" style="-fx-padding: 10; -fx-text-alignment: center;" />
+    </bottom>
+</BorderPane>
