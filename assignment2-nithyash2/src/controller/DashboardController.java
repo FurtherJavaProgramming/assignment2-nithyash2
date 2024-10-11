@@ -1,5 +1,8 @@
 package controller;
 
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -14,6 +17,7 @@ import javafx.stage.Stage;
 import model.Book;
 import model.BookStore;
 import model.User;
+import java.io.IOException;
 
 public class DashboardController {
 
@@ -56,6 +60,21 @@ public class DashboardController {
         loadAllBooks();
     }
 
+    @FXML
+    public void handleProfile() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Profile.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) dashboardPane.getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     // Method to load the top 5 books and display them in the ListView
     private void loadTop5Books() {
         BookStore bookstore = BookStore.getInstance();
@@ -81,12 +100,7 @@ public class DashboardController {
         allBooksTable.setItems(allBooks);
     }
 
-    @FXML
-    public void handleProfile() {
-        // Navigate to the Profile page
-        System.out.println("Navigating to Profile page...");
-        // Implement profile navigation logic
-    }
+
 
     @FXML
     public void handleBooks() {

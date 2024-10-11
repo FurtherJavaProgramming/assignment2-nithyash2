@@ -13,10 +13,8 @@ import java.io.IOException;
 
 public class LoginController {
 
-    private static LoginController instance;
-
     @FXML
-    private TextField usernameField;
+    private TextField usernameOrEmailField; // This should match the fx:id in the FXML
 
     @FXML
     private PasswordField passwordField;
@@ -24,35 +22,26 @@ public class LoginController {
     @FXML
     private Label messageLabel;
 
-    public LoginController() {
-        // Constructor remains empty because JavaFX calls it when FXML is loaded
-    }
-
-    @FXML
-    public void initialize() {
-        instance = this;  // Set the instance when the controller is initialized
-    }
-
-    public static LoginController getInstance() {
-        if (instance == null) {
-            throw new IllegalStateException("Controller has not been instantiated yet!");
-        }
-        return instance;
-    }
-
     @FXML
     public void handleLoginButtonAction() {
-        String username = usernameField.getText();
+        String usernameOrEmail = usernameOrEmailField.getText();
         String password = passwordField.getText();
 
-        if (authenticateUser(username, password)) {
+        // Ensure username or email and password fields are not empty
+        if (usernameOrEmail.isEmpty() || password.isEmpty()) {
+            messageLabel.setText("Please enter your username/email and password.");
+            return;
+        }
+
+        // Authenticate the user
+        if (authenticateUser(usernameOrEmail, password)) {
             messageLabel.setText("Login Successful!");
 
             // Navigate to Dashboard
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Dashboard.fxml"));
                 Parent root = loader.load();
-                Stage stage = (Stage) usernameField.getScene().getWindow();
+                Stage stage = (Stage) usernameOrEmailField.getScene().getWindow();
                 Scene scene = new Scene(root);
                 stage.setScene(scene);
                 stage.show();
@@ -69,7 +58,7 @@ public class LoginController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ForgotPassword.fxml"));
             Parent root = loader.load();
-            Stage stage = (Stage) usernameField.getScene().getWindow();
+            Stage stage = (Stage) usernameOrEmailField.getScene().getWindow();
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
@@ -83,7 +72,7 @@ public class LoginController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/SignUp.fxml"));
             Parent root = loader.load();
-            Stage stage = (Stage) usernameField.getScene().getWindow();
+            Stage stage = (Stage) usernameOrEmailField.getScene().getWindow();
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
@@ -92,8 +81,8 @@ public class LoginController {
         }
     }
 
-    private boolean authenticateUser(String username, String password) {
+    private boolean authenticateUser(String usernameOrEmail, String password) {
         User user = User.getInstance();
-        return user.validateCredentials(username, password);
+        return user.validateCredentials(usernameOrEmail, password);
     }
 }

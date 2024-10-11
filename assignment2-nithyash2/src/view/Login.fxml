@@ -13,26 +13,43 @@
 
 <GridPane fx:id="loginPane" alignment="CENTER" hgap="10" prefHeight="520.0" prefWidth="390.0" style="-fx-background-color: #ADD8E6;" vgap="10" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/23" fx:controller="controller.LoginController">
 
-    <Label prefHeight="11.0" prefWidth="78.0" text="Username:" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-    <TextField fx:id="usernameField" promptText="Enter Username" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+   <!-- Username Label/email and TextField -->
+   <Label text="Username or Email:" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+   <TextField fx:id="usernameOrEmailField" promptText="Enter Username or Email" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+   <!-- Password Label and PasswordField -->
+   <Label text="Password:" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+   <PasswordField fx:id="passwordField" promptText="Enter Password" GridPane.columnIndex="4" GridPane.rowIndex="4" />
 
-    <Label text="Password:" GridPane.columnIndex="3" GridPane.rowIndex="4" />
-    <PasswordField fx:id="passwordField" promptText="Enter Password" GridPane.columnIndex="4" GridPane.rowIndex="4" />
-
-    <Button onAction="#handleLoginButtonAction" text="Login" textFill="#c72929" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="9">
-      <padding>
-         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-      </padding></Button>
-
-    <Label fx:id="messageLabel" GridPane.columnIndex="4" GridPane.rowIndex="15"  GridPane.vgrow="ALWAYS" />
-   <CheckBox fx:id="remembermecheckbox" mnemonicParsing="false" text="Remember Me" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="13" GridPane.valignment="CENTER" />
-   <Hyperlink fx:id="forgotPasswordLink" onAction="#handleForgotPasswordAction" text="Forgot Password" GridPane.columnIndex="4" GridPane.halignment="LEFT" GridPane.rowIndex="15" />
-   <Label fx:id="lablemMessage" text="Label" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="16" GridPane.valignment="BASELINE" />
-   <Button fx:id="signupButton" mnemonicParsing="false" onAction="#handleSignUpLinkAction" text="Signup" textFill="#961f1f" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="9">
+   <!-- Login Button -->
+   <Button onAction="#handleLoginButtonAction" text="Login" textFill="#c72929" GridPane.columnIndex="4" GridPane.rowIndex="9" GridPane.halignment="CENTER">
       <padding>
          <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
       </padding>
    </Button>
+
+   <!-- Message Label for Login Status -->
+   <Label fx:id="messageLabel" GridPane.columnIndex="4" GridPane.rowIndex="15" GridPane.vgrow="ALWAYS" />
+
+   <!-- Remember Me Checkbox -->
+   <CheckBox fx:id="remembermecheckbox" mnemonicParsing="false" text="Remember Me" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="13" GridPane.valignment="CENTER" />
+
+   <!-- Forgot Password Hyperlink -->
+   <Hyperlink fx:id="forgotPasswordLink" onAction="#handleForgotPasswordAction" text="Forgot Password" GridPane.columnIndex="4" GridPane.halignment="LEFT" GridPane.rowIndex="15" />
+
+   <!-- Label Message (Optional) -->
+   <Label fx:id="labelMessage" text="Label" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="16" GridPane.valignment="BASELINE" />
+
+   <!-- Sign Up Button -->
+   <Button fx:id="signupButton" mnemonicParsing="false" onAction="#handleSignUpLinkAction" text="Sign Up" textFill="#961f1f" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="10">
+      <padding>
+         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+      </padding>
+   </Button>
+
+
+
+
+   <!-- Column and Row Constraints -->
    <columnConstraints>
       <ColumnConstraints />
       <ColumnConstraints />
@@ -41,6 +58,7 @@
       <ColumnConstraints maxWidth="144.00002441406247" minWidth="86.39998779296872" prefWidth="98.39998779296872" />
       <ColumnConstraints maxWidth="63.20001220703125" minWidth="5.5999755859375" prefWidth="51.20001220703125" />
    </columnConstraints>
+
    <rowConstraints>
       <RowConstraints />
       <RowConstraints />
@@ -62,5 +80,4 @@
       <RowConstraints />
       <RowConstraints />
    </rowConstraints>
-
 </GridPane>

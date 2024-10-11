@@ -1,10 +1,16 @@
 package controller;
 
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import javafx.fxml.FXML;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import model.Database;
 import model.User;
+
+import java.io.IOException;
 
 public class ProfileController {
 
@@ -51,6 +57,18 @@ public class ProfileController {
 
     @FXML
     public void handleBackToDashboard() {
-        // Logic to navigate back to dashboard
+        try {
+            // Load the Dashboard FXML
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Dashboard.fxml"));
+            Parent root = loader.load();
+
+            // Get the current stage (window) and set the new scene
+            Stage stage = (Stage) firstNameField.getScene().getWindow(); // Use any control to get the current window
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

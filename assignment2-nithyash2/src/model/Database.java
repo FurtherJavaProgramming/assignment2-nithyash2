@@ -29,11 +29,11 @@ public class Database {
         return conn;
     }
 
-    // Method to drop and create the users table
-    public static void createTables() {
-        String dropUsersTable = "DROP TABLE IF EXISTS users;";
+    // Method to create or update the users table
+    public static void createOrUpdateTables() {
         String createUsersTable = "CREATE TABLE IF NOT EXISTS users ("
                 + " id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + " username TEXT NOT NULL UNIQUE,"  // Ensure username column
                 + " email TEXT NOT NULL UNIQUE,"
                 + " password TEXT NOT NULL,"
                 + " first_name TEXT,"
@@ -41,35 +41,44 @@ public class Database {
                 + ");";
 
         try (Connection conn = connect();
-             PreparedStatement dropStmt = conn.prepareStatement(dropUsersTable);
-             PreparedStatement createStmt = conn.prepareStatement(createUsersTable)) {
-
-            // Drop the users table if it exists
-            dropStmt.execute();
-
-            // Create the new users table
-            createStmt.execute();
+             PreparedStatement pstmt = conn.prepareStatement(createUsersTable)) {
+            pstmt.execute();
             System.out.println("Users table created or already exists.");
-
         } catch (SQLException e) {
             System.out.println("Error: " + e.getMessage());
         }
     }
 
     // Method to add a new user to the database
-    public static void addUser(String email, String password, String firstName, String lastName) {
-        String sql = "INSERT INTO users(email, password, first_name, last_name) VALUES(?, ?, ?, ?)";
-
+    public static void addUser(String username, String email, String password, String firstName, String lastName) {
+        String sql = "INSERT INTO users(username, email, password, first_name, last_name) VALUES(?, ?, ?, ?, ?)";
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, email);
-            pstmt.setString(2, password);
-            pstmt.setString(3, firstName);
-            pstmt.setString(4, lastName);
+            pstmt.setString(1, username);
+            pstmt.setString(2, email);
+            pstmt.setString(3, password);
+            pstmt.setString(4, firstName);
+            pstmt.setString(5, lastName);
             pstmt.executeUpdate();
             System.out.println("User added to the database.");
         } catch (SQLException e) {
             System.out.println("Error adding user: " + e.getMessage());
+        }
+    }
+
+    // Method to update user profile
+    public static void updateUserProfile(String email, String firstName, String lastName, String password) {
+        String sql = "UPDATE users SET first_name = ?, last_name = ?, password = ? WHERE email = ?";
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, firstName);
+            pstmt.setString(2, lastName);
+            pstmt.setString(3, password);
+            pstmt.setString(4, email);
+            pstmt.executeUpdate();
+            System.out.println("User profile updated successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error updating user profile: " + e.getMessage());
         }
     }
 }
