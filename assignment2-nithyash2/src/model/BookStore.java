@@ -12,6 +12,7 @@ public class BookStore {
     // Private constructor for Singleton pattern
     private BookStore() {
         books = new ArrayList<>();
+        // Sample books to initialize the bookstore
         books.add(new Book("Absolute Java", "Savitch", 50.0, 10, 142));
         books.add(new Book("Java: How to Program", "Deitel and Deitel", 70.0, 100, 475));
         books.add(new Book("Computing Concepts with JAVA 8 Essentials", "Horstman", 89.0, 500, 60));
@@ -75,5 +76,20 @@ public class BookStore {
             return true; // Sale successful
         }
         return false; // Insufficient stock
+    }
+
+    // Add a new book to the store (for admin)
+    public void addBook(Book newBook) {
+        books.add(newBook);
+    }
+
+    // Remove a book from the store by title (for admin)
+    public boolean removeBook(String title) {
+        Book book = findBookByTitle(title);
+        if (book != null) {
+            books.remove(book);
+            return true; // Book removed
+        }
+        return false; // Book not found
     }
 }

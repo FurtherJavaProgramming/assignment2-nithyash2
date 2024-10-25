@@ -1,19 +1,20 @@
 package model;
 
-public class Book {
+import java.io.Serializable;
+
+public class Book implements Serializable {
     private String title;
     private String author;
     private double price;
     private int stock;
     private int soldCopies;
 
-    // Constructor with parameters
-    public Book(String title, String author, double price, int stock, int soldCopies) {
+    public Book(String title, String author, double price, int stock) {
         this.title = title;
         this.author = author;
         this.price = price;
         this.stock = stock;
-        this.soldCopies = soldCopies;
+        this.soldCopies = 0; // Initialize sold copies
     }
 
     // Getters and Setters
@@ -55,6 +56,22 @@ public class Book {
 
     public void setSoldCopies(int soldCopies) {
         this.soldCopies = soldCopies;
+    }
+
+    // Method to update stock when a book is sold
+    public boolean sellBook(int quantity) {
+        if (stock >= quantity) {
+            stock -= quantity;
+            soldCopies += quantity;
+            return true;
+        } else {
+            return false; // Not enough stock
+        }
+    }
+
+    // Method to restock books (for admin functionality)
+    public void restockBook(int quantity) {
+        this.stock += quantity;
     }
 
     @Override
