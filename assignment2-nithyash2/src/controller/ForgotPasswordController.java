@@ -1,28 +1,55 @@
 package controller;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Label;
+import javafx.stage.Stage;
+import java.io.IOException;
 
 public class ForgotPasswordController {
 
     @FXML
-    private TextField emailField;
+    private TextField usernameOrEmailField;
 
     @FXML
     private Label messageLabel;
 
-    @FXML
-    public void handleSubmitAction() {
-        String email = emailField.getText();
+    // Static variable to store the identifier
+    private static String userIdentifier;
 
-        if (email.isEmpty()) {
-            messageLabel.setText("Please enter your email.");
-        } else if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
-            messageLabel.setText("Please enter a valid email address.");
-        } else {
-            // Instead of sending an email, we just display a success message
-            messageLabel.setText("Password recovery instructions would be sent to " + email);
+    @FXML
+    public void handleForgotPassword() {
+        String usernameOrEmail = usernameOrEmailField.getText().trim();
+
+        if (usernameOrEmail.isEmpty()) {
+            messageLabel.setText("Please enter your username or email.");
+            return;
         }
+
+        // Save the identifier for use in ResetPasswordController
+        userIdentifier = usernameOrEmail;
+        navigateToResetPassword();
+    }
+
+    // Method to navigate to the Reset Password screen
+    private void navigateToResetPassword() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ResetPassword.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) usernameOrEmailField.getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Public method to allow ResetPasswordController access to the identifier
+    public static String getUserIdentifier() {
+        return userIdentifier;
     }
 }

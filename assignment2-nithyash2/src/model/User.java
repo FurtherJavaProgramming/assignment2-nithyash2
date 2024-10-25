@@ -16,11 +16,7 @@ public class User {
 
     // Private constructor for Singleton
     private User() {
-        this.firstName = "Admin";
-        this.lastName = "Admin";
-        this.email = "admin@example.com";
-        this.username = "admin";  // Default admin username
-        this.password = "password"; // Default admin password
+        // No default values to prevent incorrect data on the profile page
     }
 
     // Singleton instance getter
@@ -50,13 +46,13 @@ public class User {
             pstmt.executeUpdate();
             System.out.println("User " + username + " added to the database.");
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Error adding user: " + e.getMessage());
         }
     }
 
-    // Validate credentials against the database
+    // Validate credentials against the database and update User instance
     public boolean validateCredentials(String login, String password) {
-        String sql = "SELECT first_name, last_name, password FROM users WHERE (email = ? OR username = ?) AND password = ?";
+        String sql = "SELECT first_name, last_name, email, username, password FROM users WHERE (LOWER(email) = LOWER(?) OR username = ?) AND password = ?";
         try (Connection conn = Database.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, login.toLowerCase());  // Convert email to lowercase for case-insensitive validation
@@ -64,13 +60,16 @@ public class User {
             pstmt.setString(3, password);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
+                // Update the User instance with the logged-in user's data
                 this.firstName = rs.getString("first_name");
                 this.lastName = rs.getString("last_name");
+                this.email = rs.getString("email");
+                this.username = rs.getString("username");
                 this.password = rs.getString("password");
                 return true;
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Error during login: " + e.getMessage());
         }
         return false;
     }

@@ -1,16 +1,20 @@
 package controller;
 
+import model.Database;
+import model.User;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.fxml.FXML;
-import javafx.scene.control.PasswordField;
+import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
-import model.Database;
-import model.User;
-
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.Label;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 public class ProfileController {
 
@@ -21,49 +25,84 @@ public class ProfileController {
     private TextField lastNameField;
 
     @FXML
-    private TextField emailField;
+    private TextField emailField; // Read-Only
 
     @FXML
-    private PasswordField passwordField;
+    private PasswordField newPasswordField;
 
-    private User currentUser;
+    @FXML
+    private PasswordField confirmPasswordField;
+
+    @FXML
+    private Label messageLabel;
+
+    @FXML
+    private Button backButton; // Ensure this matches the fx:id in Profile.fxml
 
     @FXML
     public void initialize() {
-        // Load current user info from singleton or database
-        currentUser = User.getInstance();
-
-        // Display current user information
-        firstNameField.setText(currentUser.getFirstName());
-        lastNameField.setText(currentUser.getLastName());
-        emailField.setText(currentUser.getEmail());
+        User user = User.getInstance();
+        firstNameField.setText(user.getFirstName());
+        lastNameField.setText(user.getLastName());
+        emailField.setText(user.getEmail()); // Display email but make it read-only
     }
 
     @FXML
-    public void handleSaveProfile() {
-        // Save updated profile info
-        String updatedFirstName = firstNameField.getText();
-        String updatedLastName = lastNameField.getText();
-        String updatedPassword = passwordField.getText();
+    public void handleSaveChanges() {
+        String firstName = firstNameField.getText().trim();
+        String lastName = lastNameField.getText().trim();
+        String newPassword = newPasswordField.getText().trim();
+        String confirmPassword = confirmPasswordField.getText().trim();
 
-        // Update in the database
-        Database.updateUserProfile(currentUser.getEmail(), updatedFirstName, updatedLastName, updatedPassword);
+        // Validate inputs
+        if (firstName.isEmpty() || lastName.isEmpty()) {
+            messageLabel.setText("First name and last name cannot be empty.");
+            return;
+        }
 
-        // Update in the User singleton
-        currentUser.setFirstName(updatedFirstName);
-        currentUser.setLastName(updatedLastName);
-        currentUser.setPassword(updatedPassword);
+        if (!newPassword.isEmpty() || !confirmPassword.isEmpty()) {
+            // If new password fields are filled, ensure they match
+            if (!newPassword.equals(confirmPassword)) {
+                messageLabel.setText("Passwords do not match.");
+                return;
+            }
+        }
+
+        // Update the profile in the database
+        User user = User.getInstance();
+        try (Connection conn = Database.connect()) {
+            String updateSql = "UPDATE users SET first_name = ?, last_name = ?, password = ? WHERE email = ?";
+            PreparedStatement pstmt = conn.prepareStatement(updateSql);
+            pstmt.setString(1, firstName);
+            pstmt.setString(2, lastName);
+
+            // Use the new password if provided, otherwise keep the existing one
+            String passwordToSave = newPassword.isEmpty() ? user.getPassword() : newPassword;
+            pstmt.setString(3, passwordToSave);
+            pstmt.setString(4, user.getEmail());
+
+            pstmt.executeUpdate();
+
+            // Update the User singleton
+            user.setFirstName(firstName);
+            user.setLastName(lastName);
+            if (!newPassword.isEmpty()) {
+                user.setPassword(newPassword);
+            }
+
+            messageLabel.setText("Profile updated successfully.");
+        } catch (SQLException e) {
+            messageLabel.setText("Error updating profile.");
+            e.printStackTrace();
+        }
     }
 
     @FXML
     public void handleBackToDashboard() {
         try {
-            // Load the Dashboard FXML
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Dashboard.fxml"));
             Parent root = loader.load();
-
-            // Get the current stage (window) and set the new scene
-            Stage stage = (Stage) firstNameField.getScene().getWindow(); // Use any control to get the current window
+            Stage stage = (Stage) backButton.getScene().getWindow(); // Use the backButton to get the current stage
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
