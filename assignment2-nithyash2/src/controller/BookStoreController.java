@@ -1,90 +1,71 @@
 package controller;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.stage.Stage;
+import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TextField;
 import model.Book;
+import model.BookStore;
 import model.ShoppingCart;
 
-import java.io.IOException;
-
-public class ShoppingCartController {
+public class BookStoreController {
 
     @FXML
-    private TableView<Book> cartTable;
+    private ListView<Book> bookListView; // List to display available books
 
     @FXML
-    private TableColumn<Book, String> titleColumn;
+    private Button addToCartButton; // Button to add selected book to the cart
 
     @FXML
-    private TableColumn<Book, Double> priceColumn;
+    private TextField quantityField; // Field to specify quantity of the book to be added
 
     @FXML
-    private TableColumn<Book, Integer> quantityColumn;
+    private Button viewCartButton; // Button to view shopping cart
 
-    @FXML
-    private Label totalLabel;
-
-    @FXML
-    private Button checkoutButton;
-
-    @FXML
-    private Button backButton;
-
-    private ShoppingCart cart;
+    private BookStore bookStore;
+    private ShoppingCart shoppingCart;
 
     @FXML
     public void initialize() {
-        cart = ShoppingCart.getInstance();
+        bookStore = BookStore.getInstance();
+        shoppingCart = ShoppingCart.getInstance();
 
-        // Set up the table columns
-        titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
-        priceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
-        quantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-
-        // Load cart items into the table
-        loadCartItems();
-
-        // Calculate and display total
-        updateTotal();
+        // Populate the book list view with books from the store
+        ObservableList<Book> bookObservableList = FXCollections.observableArrayList(bookStore.getBooks());
+        bookListView.setItems(bookObservableList);
+        bookListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
     }
 
-    private void loadCartItems() {
-        cartTable.getItems().setAll(cart.getItems());
-    }
-
-    private void updateTotal() {
-        double total = cart.calculateTotal();
-        totalLabel.setText("Total: $" + total);
-    }
-
+    // Handle adding a book to the cart
     @FXML
-    public void handleCheckout() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Checkout.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) checkoutButton.getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
+    public void handleAddToCart() {
+        Book selectedBook = bookListView.getSelectionModel().getSelectedItem();
+        if (selectedBook != null) {
+            try {
+                int quantity = Integer.parseInt(quantityField.getText());
+                if (quantity > 0 && selectedBook.getStock() >= quantity) {
+                    shoppingCart.addItem(selectedBook, quantity);
+                    selectedBook.setStock(selectedBook.getStock() - quantity); // Decrease stock after adding to cart
+                } else {
+                    // Handle error (insufficient stock or invalid quantity)
+                    System.out.println("Invalid quantity or insufficient stock.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid quantity.");
+            }
         }
     }
 
+    // Navigate to view cart page
     @FXML
-    public void handleBackToBookstore() {
+    public void handleViewCart() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/BookStore.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ShoppingCart.fxml"));
             Parent root = loader.load();
-            Stage stage = (Stage) backButton.getScene().getWindow();
+            Stage stage = (Stage) viewCartButton.getScene().getWindow();
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
@@ -93,3 +74,4 @@ public class ShoppingCartController {
         }
     }
 }
+
