@@ -14,7 +14,7 @@ import java.io.IOException;
 public class LoginController {
 
     @FXML
-    private TextField usernameOrEmailField; // This should match the fx:id in the FXML
+    private TextField usernameOrEmailField;
 
     @FXML
     private PasswordField passwordField;
@@ -37,9 +37,19 @@ public class LoginController {
         if (authenticateUser(usernameOrEmail, password)) {
             messageLabel.setText("Login Successful!");
 
-            // Navigate to Dashboard
+            // Navigate based on user type
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Dashboard.fxml"));
+                User user = User.getInstance();
+                FXMLLoader loader;
+
+                if (user.isAdmin()) {  // Use the isAdmin flag to determine if it's an admin
+                    // Navigate to Admin Dashboard
+                    loader = new FXMLLoader(getClass().getResource("/view/AdminDashboard.fxml"));
+                } else {
+                    // Navigate to User Dashboard
+                    loader = new FXMLLoader(getClass().getResource("/view/Dashboard.fxml"));
+                }
+
                 Parent root = loader.load();
                 Stage stage = (Stage) usernameOrEmailField.getScene().getWindow();
                 Scene scene = new Scene(root);

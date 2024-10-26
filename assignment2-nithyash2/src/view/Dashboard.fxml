@@ -17,7 +17,6 @@
     <left>
         <VBox spacing="10" style="-fx-padding: 10;">
             <Button text="Profile" onAction="#handleProfile" />
-            <Button fx:id="booksButton" text="Books" onAction="#handleBooks" /> <!-- Added fx:id here -->
             <Button text="Orders" onAction="#handleOrders" />
             <Button text="Settings" onAction="#handleSettings" />
         </VBox>
@@ -40,6 +39,13 @@
                     <TableColumn fx:id="stockColumn" text="Stock" />
                 </columns>
             </TableView>
+
+            <!-- Quantity input and Add to Cart button -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Quantity:" />
+                <TextField fx:id="quantityField" promptText="Enter quantity" />
+                <Button text="Add to Cart" onAction="#handleAddToCart" />
+            </HBox>
         </VBox>
     </center>
 

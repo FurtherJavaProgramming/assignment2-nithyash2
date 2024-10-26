@@ -10,8 +10,7 @@ public class main extends Application {
     @Override
     public void start(Stage primaryStage) {
         // Create the necessary tables before starting the login view
-        Database.createOrUpdateTables();
-
+        Database.createTables();
         // Start the login view after ensuring the database tables exist
         LoginView loginView = new LoginView();
         loginView.start(primaryStage);

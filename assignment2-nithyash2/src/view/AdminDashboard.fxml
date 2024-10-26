@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Button?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="controller.AdminDashboardController">
+    <top>
+        <Label text="Welcome, Admin!" style="-fx-font-size: 18px;" />
+    </top>
+    <center>
+        <TableView fx:id="bookTableView">
+            <columns>
+                <TableColumn text="Title" fx:id="titleColumn" />
+                <TableColumn text="Author" fx:id="authorColumn" />
+                <TableColumn text="Price" fx:id="priceColumn" />
+                <TableColumn text="Sold Copies" fx:id="soldCopiesColumn" />
+                <TableColumn text="Stock" fx:id="stockColumn" />
+            </columns>
+        </TableView>
+    </center>
+    <bottom>
+        <HBox spacing="10">
+            <Label text="Adjust Stock:" />
+            <TextField fx:id="stockAdjustmentField" promptText="Enter new stock" />
+            <Button text="Increase Stock" onAction="#handleIncreaseStock" />
+            <Button text="Decrease Stock" onAction="#handleDecreaseStock" />
+        </HBox>
+    </bottom>
+</BorderPane>

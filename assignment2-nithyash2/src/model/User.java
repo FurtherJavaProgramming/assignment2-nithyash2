@@ -13,6 +13,7 @@ public class User {
     private String email;
     private String username;
     private String password;
+    private boolean isAdmin;
 
     // Private constructor for Singleton
     private User() {
@@ -34,6 +35,7 @@ public class User {
         this.email = email.toLowerCase(); // Convert email to lowercase
         this.username = username;
         this.password = password;
+        this.isAdmin = false;  // Default users are not admin
 
         String sql = "INSERT INTO users(username, email, password, first_name, last_name) VALUES(?, ?, ?, ?, ?)";
         try (Connection conn = Database.connect();
@@ -52,6 +54,19 @@ public class User {
 
     // Validate credentials against the database and update User instance
     public boolean validateCredentials(String login, String password) {
+        // Check if admin credentials match
+        if (login.equalsIgnoreCase("admin") && password.equals("reading_admin")) {
+            // Set admin properties
+            this.username = "admin";
+            this.firstName = "Admin";
+            this.lastName = "Admin";
+            this.email = "admin@example.com";
+            this.password = password;
+            this.isAdmin = true;
+            return true;
+        }
+
+        // Check database for regular user credentials
         String sql = "SELECT first_name, last_name, email, username, password FROM users WHERE (LOWER(email) = LOWER(?) OR username = ?) AND password = ?";
         try (Connection conn = Database.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -66,12 +81,18 @@ public class User {
                 this.email = rs.getString("email");
                 this.username = rs.getString("username");
                 this.password = rs.getString("password");
+                this.isAdmin = false; // Regular users are not admin
                 return true;
             }
         } catch (SQLException e) {
             System.out.println("Error during login: " + e.getMessage());
         }
         return false;
+    }
+
+    // Check if the current user is an admin
+    public boolean isAdmin() {
+        return isAdmin;
     }
 
     // Getters and Setters for User fields
