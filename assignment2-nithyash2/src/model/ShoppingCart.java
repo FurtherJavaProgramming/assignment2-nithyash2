@@ -46,6 +46,12 @@ public class ShoppingCart {
         }
     }
 
+    // Update quantity of an existing item in the cart
+    public void updateItemQuantity(String username, CartItem cartItem, int quantity) {
+        cartItem.setQuantity(quantity);
+        Database.saveCartItem(username, cartItem.getBook(), quantity); // Save updated quantity to database
+    }
+
     // Remove an item from the shopping cart
     public void removeItem(String username, Book book) {
         items.removeIf(item -> {

@@ -1,40 +1,41 @@
 package model;
 
-import java.io.Serializable;
+import javafx.beans.property.*;
 
-public class CartItem implements Serializable {
+public class CartItem {
     private Book book;
-    private int quantity;
+    private IntegerProperty quantity;
+    private DoubleProperty totalCost;
 
     public CartItem(Book book, int quantity) {
         this.book = book;
-        this.quantity = quantity;
+        this.quantity = new SimpleIntegerProperty(quantity);
+        this.totalCost = new SimpleDoubleProperty(book.getPrice() * quantity);
     }
 
-    // Getters and Setters
-    public Book getBook() {
-        return book;
-    }
-
-    public void setBook(Book book) {
-        this.book = book;
+    // Update total cost based on quantity
+    public void setQuantity(int quantity) {
+        this.quantity.set(quantity);
+        this.totalCost.set(book.getPrice() * quantity);
     }
 
     public int getQuantity() {
+        return quantity.get();
+    }
+
+    public IntegerProperty quantityProperty() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
+    public double getTotalCost() {
+        return totalCost.get();
     }
 
-    // Calculate total price for this cart item
-    public double getTotalPrice() {
-        return book.getPrice() * quantity;
+    public DoubleProperty totalCostProperty() {
+        return totalCost;
     }
 
-    @Override
-    public String toString() {
-        return book.getTitle() + " - " + quantity + " pcs";
+    public Book getBook() {
+        return book;
     }
 }
