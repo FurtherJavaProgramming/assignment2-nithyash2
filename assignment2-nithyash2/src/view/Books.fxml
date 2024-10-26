@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.BooksController">
+    <top>
+        <Label text="Books Available" style="-fx-font-size: 20px; -fx-padding: 10;" BorderPane.alignment="CENTER"/>
+    </top>
+
+    <center>
+        <TableView fx:id="booksTable">
+            <columns>
+                <TableColumn text="Title" fx:id="titleColumn" prefWidth="150"/>
+                <TableColumn text="Author" fx:id="authorColumn" prefWidth="150"/>
+                <TableColumn text="Price" fx:id="priceColumn" prefWidth="80"/>
+                <TableColumn text="Stock" fx:id="stockColumn" prefWidth="80"/>
+            </columns>
+        </TableView>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" alignment="CENTER" style="-fx-padding: 10;">
+            <Button text="Add to Cart" onAction="#handleAddToCart" fx:id="addToCartButton"/>
+            <Button text="Back to Dashboard" onAction="#handleBackToDashboard" fx:id="backButton"/>
+        </HBox>
+    </bottom>
+</BorderPane>

@@ -12,16 +12,16 @@ public class BookStore {
     // Private constructor for Singleton pattern
     private BookStore() {
         books = new ArrayList<>();
-        // Sample books to initialize the bookstore
-        books.add(new Book("Absolute Java", "Savitch", 50.0, 10, 142));
-        books.add(new Book("Java: How to Program", "Deitel and Deitel", 70.0, 100, 475));
-        books.add(new Book("Computing Concepts with JAVA 8 Essentials", "Horstman", 89.0, 500, 60));
-        books.add(new Book("Java Software Solutions", "Lewis and Loftus", 99.0, 500, 12));
-        books.add(new Book("Java Program Design", "Cohoon and Davidson", 29.0, 2, 86));
-        books.add(new Book("Clean Code", "Robert Martin", 45.0, 100, 300));
-        books.add(new Book("Gray Hat C#", "Brandon Perry", 68.0, 300, 178));
-        books.add(new Book("Python Basics", "David Amos", 49.0, 1000, 79));
-        books.add(new Book("Bayesian Statistics The Fun Way", "Will Kurt", 42.0, 600, 155));
+        // Corrected initialization to match the constructor in Book.java
+        books.add(new Book("Absolute Java", "Savitch", 50.0, 10));
+        books.add(new Book("Java: How to Program", "Deitel and Deitel", 70.0, 100));
+        books.add(new Book("Computing Concepts with JAVA 8 Essentials", "Horstman", 89.0, 500));
+        books.add(new Book("Java Software Solutions", "Lewis and Loftus", 99.0, 500));
+        books.add(new Book("Java Program Design", "Cohoon and Davidson", 29.0, 2));
+        books.add(new Book("Clean Code", "Robert Martin", 45.0, 100));
+        books.add(new Book("Gray Hat C#", "Brandon Perry", 68.0, 300));
+        books.add(new Book("Python Basics", "David Amos", 49.0, 1000));
+        books.add(new Book("Bayesian Statistics The Fun Way", "Will Kurt", 42.0, 600));
     }
 
     // Get Singleton instance

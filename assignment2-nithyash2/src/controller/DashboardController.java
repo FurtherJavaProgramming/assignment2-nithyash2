@@ -18,11 +18,15 @@ import model.Book;
 import model.BookStore;
 import model.User;
 import java.io.IOException;
+import javafx.scene.control.Button;
 
 public class DashboardController {
 
     @FXML
     private BorderPane dashboardPane;
+
+    @FXML
+    private Button booksButton;
 
     @FXML
     private Label welcomeLabel;
@@ -102,12 +106,24 @@ public class DashboardController {
 
 
 
+
+
     @FXML
     public void handleBooks() {
-        // Navigate to the Books page
-        System.out.println("Navigating to Books page...");
-        // Implement books navigation logic
+        try {
+            System.out.println("Navigating to Books page...");
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Books.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) booksButton.getScene().getWindow(); // Assuming you have a button named booksButton
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Error navigating to Books page.");
+        }
     }
+
 
     @FXML
     public void handleOrders() {

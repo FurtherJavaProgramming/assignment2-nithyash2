@@ -10,24 +10,27 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
-import model.Book;
+import model.CartItem;
 import model.ShoppingCart;
+import model.User;
+
+
 
 import java.io.IOException;
 
 public class ShoppingCartController {
 
     @FXML
-    private TableView<Book> cartTable;
+    private TableView<CartItem> cartTable;
 
     @FXML
-    private TableColumn<Book, String> titleColumn;
+    private TableColumn<CartItem, String> titleColumn;
 
     @FXML
-    private TableColumn<Book, Double> priceColumn;
+    private TableColumn<CartItem, Double> priceColumn;
 
     @FXML
-    private TableColumn<Book, Integer> quantityColumn;
+    private TableColumn<CartItem, Integer> quantityColumn;
 
     @FXML
     private Label totalLabel;
@@ -43,6 +46,7 @@ public class ShoppingCartController {
     @FXML
     public void initialize() {
         cart = ShoppingCart.getInstance();
+        cart.loadItemsFromDatabase(User.getInstance().getUsername());
 
         // Set up the table columns
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
@@ -61,7 +65,7 @@ public class ShoppingCartController {
     }
 
     private void updateTotal() {
-        double total = cart.calculateTotal();
+        double total = cart.getTotalCost();
         totalLabel.setText("Total: $" + total);
     }
 

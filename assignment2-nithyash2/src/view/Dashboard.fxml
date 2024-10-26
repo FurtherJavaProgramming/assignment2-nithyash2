@@ -17,7 +17,7 @@
     <left>
         <VBox spacing="10" style="-fx-padding: 10;">
             <Button text="Profile" onAction="#handleProfile" />
-            <Button text="Books" onAction="#handleBooks" />
+            <Button fx:id="booksButton" text="Books" onAction="#handleBooks" /> <!-- Added fx:id here -->
             <Button text="Orders" onAction="#handleOrders" />
             <Button text="Settings" onAction="#handleSettings" />
         </VBox>
