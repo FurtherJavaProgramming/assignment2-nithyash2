@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import model.CartItem;
 import model.ShoppingCart;
+import model.User;
 
 public class ShoppingCartController {
 
@@ -23,6 +24,7 @@ public class ShoppingCartController {
     private Label totalCostLabel;
 
     private final ShoppingCart cart = ShoppingCart.getInstance();
+    private final User currentUser = User.getInstance();
     private ObservableList<CartItem> cartItems;
 
     @FXML
@@ -37,9 +39,7 @@ public class ShoppingCartController {
         titleColumn.setCellValueFactory(cellData -> cellData.getValue().getBook().titleProperty());
         quantityColumn.setCellValueFactory(cellData -> cellData.getValue().quantityProperty().asObject());
         priceColumn.setCellValueFactory(cellData -> cellData.getValue().getBook().priceProperty().asObject());
-        totalColumn.setCellValueFactory(cellData ->
-                cellData.getValue().totalCostProperty().asObject()
-        );
+        totalColumn.setCellValueFactory(cellData -> cellData.getValue().totalCostProperty().asObject());
 
         cartTableView.setItems(cartItems);
     }
@@ -62,7 +62,7 @@ public class ShoppingCartController {
                 try {
                     int quantity = Integer.parseInt(quantityStr);
                     if (quantity > 0 && quantity <= selectedItem.getBook().getStock()) {
-                        cart.updateItemQuantity(selectedItem, quantity);
+                        cart.updateItemQuantity(currentUser.getUsername(), selectedItem, quantity); // Updated call
                         cartTableView.refresh();
                         updateTotalCost();
                     } else {
@@ -81,7 +81,7 @@ public class ShoppingCartController {
     private void handleRemoveItem() {
         CartItem selectedItem = cartTableView.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
-            cart.removeItem(selectedItem.getBook());
+            cart.removeItem(currentUser.getUsername(), selectedItem.getBook()); // Updated call
             cartItems.remove(selectedItem);
             updateTotalCost();
         } else {
@@ -91,8 +91,8 @@ public class ShoppingCartController {
 
     @FXML
     private void handleCheckout() {
-        // Logic for checkout, could involve navigating to a payment page
         showAlert(Alert.AlertType.INFORMATION, "Checkout", "Proceeding to checkout...");
+        // Additional checkout logic here
     }
 
     private void showAlert(Alert.AlertType alertType, String title, String message) {
