@@ -22,18 +22,28 @@ public class ShoppingCart {
 
     // Add an item to the shopping cart
     public void addItem(String username, Book book, int quantity) {
-        // Check if the book already exists in the cart
-        for (CartItem item : items) {
-            if (item.getBook().getTitle().equalsIgnoreCase(book.getTitle())) {
-                item.setQuantity(item.getQuantity() + quantity); // Update quantity
-                Database.saveCartItem(username, book, item.getQuantity()); // Save updated item to the database
-                return;
+        // Check if requested quantity is available in stock
+        if (Database.checkBookStock(book.getTitle(), quantity)) {
+            // Check if the book already exists in the cart
+            for (CartItem item : items) {
+                if (item.getBook().getTitle().equalsIgnoreCase(book.getTitle())) {
+                    int newQuantity = item.getQuantity() + quantity;
+                    if (Database.checkBookStock(book.getTitle(), newQuantity)) {
+                        item.setQuantity(newQuantity); // Update quantity
+                        Database.saveCartItem(username, book, newQuantity); // Save updated item to the database
+                    } else {
+                        System.out.println("Requested quantity exceeds available stock for: " + book.getTitle());
+                    }
+                    return;
+                }
             }
+            // Add new item to the cart
+            CartItem newItem = new CartItem(book, quantity);
+            items.add(newItem);
+            Database.saveCartItem(username, book, quantity); // Save new item to the database
+        } else {
+            System.out.println("Requested quantity exceeds available stock for: " + book.getTitle());
         }
-        // Add new item to the cart
-        CartItem newItem = new CartItem(book, quantity);
-        items.add(newItem);
-        Database.saveCartItem(username, book, quantity); // Save new item to the database
     }
 
     // Remove an item from the shopping cart

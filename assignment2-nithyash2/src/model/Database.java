@@ -109,6 +109,25 @@ public class Database {
         }
     }
 
+    // Check if a book has sufficient stock for the requested quantity
+    public static boolean checkBookStock(String title, int quantity) {
+        String sql = "SELECT stock FROM books WHERE title = ?";
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, title);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                int stock = rs.getInt("stock");
+                return stock >= quantity;
+            }
+        } catch (SQLException e) {
+            System.out.println("Error checking book stock: " + e.getMessage());
+        }
+        return false;
+    }
+
     // Save or update a cart item in the database
     public static void saveCartItem(String username, Book book, int quantity) {
         String sql = "INSERT INTO cart_items (username, book_title, quantity, price) VALUES (?, ?, ?, ?) "
