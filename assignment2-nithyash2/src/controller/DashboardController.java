@@ -41,17 +41,14 @@ public class DashboardController {
 
     private final ShoppingCart cart = ShoppingCart.getInstance();
 
-    // Initialize the Dashboard with User Information and book lists
     @FXML
     public void initialize() {
         User currentUser = User.getInstance();
         welcomeLabel.setText("Welcome, " + currentUser.getFirstName() + "!");
-
         loadTop5Books();
         loadAllBooks();
     }
 
-    // Method to load the top 5 books and display them in the ListView
     private void loadTop5Books() {
         BookStore bookstore = BookStore.getInstance();
         ObservableList<String> topBooks = FXCollections.observableArrayList();
@@ -63,7 +60,6 @@ public class DashboardController {
         booksListView.setItems(topBooks);
     }
 
-    // Method to load all available books in the bookstore and display them in the TableView
     private void loadAllBooks() {
         ObservableList<Book> allBooks = FXCollections.observableArrayList(BookStore.getInstance().getBooks());
 
@@ -78,11 +74,12 @@ public class DashboardController {
     @FXML
     private void handleAddToCart() {
         Book selectedBook = allBooksTable.getSelectionModel().getSelectedItem();
+        User currentUser = User.getInstance();
         if (selectedBook != null) {
             try {
                 int quantity = Integer.parseInt(quantityField.getText().trim());
                 if (quantity > 0 && quantity <= selectedBook.getStock()) {
-                    cart.addItem(selectedBook, quantity); // Add to cart with specified quantity
+                    cart.addItem(currentUser.getUsername(), selectedBook, quantity); // Include username in call
                     showAlert(Alert.AlertType.INFORMATION, "Success", "Book added to cart successfully.");
                 } else {
                     showAlert(Alert.AlertType.WARNING, "Stock Limit", "Quantity exceeds stock available.");
@@ -137,4 +134,19 @@ public class DashboardController {
         Stage stage = (Stage) dashboardPane.getScene().getWindow();
         stage.close();
     }
+
+    @FXML
+    public void handleViewCart() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ShoppingCart.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("Shopping Cart");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

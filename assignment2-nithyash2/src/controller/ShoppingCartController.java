@@ -1,99 +1,104 @@
 package controller;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.stage.Stage;
+import javafx.scene.control.*;
 import model.CartItem;
 import model.ShoppingCart;
-import model.User;
-
-
-
-import java.io.IOException;
 
 public class ShoppingCartController {
 
     @FXML
-    private TableView<CartItem> cartTable;
-
+    private TableView<CartItem> cartTableView;
     @FXML
     private TableColumn<CartItem, String> titleColumn;
-
-    @FXML
-    private TableColumn<CartItem, Double> priceColumn;
-
     @FXML
     private TableColumn<CartItem, Integer> quantityColumn;
-
     @FXML
-    private Label totalLabel;
-
+    private TableColumn<CartItem, Double> priceColumn;
     @FXML
-    private Button checkoutButton;
-
+    private TableColumn<CartItem, Double> totalColumn;
     @FXML
-    private Button backButton;
+    private Label totalCostLabel;
 
-    private ShoppingCart cart;
+    private final ShoppingCart cart = ShoppingCart.getInstance();
+    private ObservableList<CartItem> cartItems;
 
     @FXML
     public void initialize() {
-        cart = ShoppingCart.getInstance();
-        cart.loadItemsFromDatabase(User.getInstance().getUsername());
-
-        // Set up the table columns
-        titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
-        priceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
-        quantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-
-        // Load cart items into the table
         loadCartItems();
-
-        // Calculate and display total
-        updateTotal();
+        updateTotalCost();
     }
 
     private void loadCartItems() {
-        cartTable.getItems().setAll(cart.getItems());
+        cartItems = FXCollections.observableArrayList(cart.getItems());
+
+        titleColumn.setCellValueFactory(cellData -> cellData.getValue().getBook().titleProperty());
+        quantityColumn.setCellValueFactory(cellData -> cellData.getValue().quantityProperty().asObject());
+        priceColumn.setCellValueFactory(cellData -> cellData.getValue().getBook().priceProperty().asObject());
+        totalColumn.setCellValueFactory(cellData ->
+                cellData.getValue().totalCostProperty().asObject()
+        );
+
+        cartTableView.setItems(cartItems);
     }
 
-    private void updateTotal() {
-        double total = cart.getTotalCost();
-        totalLabel.setText("Total: $" + total);
+    private void updateTotalCost() {
+        double totalCost = cart.getTotalCost();
+        totalCostLabel.setText(String.format("$%.2f", totalCost));
     }
 
     @FXML
-    public void handleCheckout() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Checkout.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) checkoutButton.getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
+    private void handleUpdateQuantity() {
+        CartItem selectedItem = cartTableView.getSelectionModel().getSelectedItem();
+        if (selectedItem != null) {
+            TextInputDialog dialog = new TextInputDialog(String.valueOf(selectedItem.getQuantity()));
+            dialog.setTitle("Update Quantity");
+            dialog.setHeaderText("Update quantity for " + selectedItem.getBook().getTitle());
+            dialog.setContentText("Enter new quantity:");
+
+            dialog.showAndWait().ifPresent(quantityStr -> {
+                try {
+                    int quantity = Integer.parseInt(quantityStr);
+                    if (quantity > 0 && quantity <= selectedItem.getBook().getStock()) {
+                        cart.updateItemQuantity(selectedItem, quantity);
+                        cartTableView.refresh();
+                        updateTotalCost();
+                    } else {
+                        showAlert(Alert.AlertType.WARNING, "Invalid Quantity", "Quantity exceeds available stock.");
+                    }
+                } catch (NumberFormatException e) {
+                    showAlert(Alert.AlertType.ERROR, "Invalid Input", "Please enter a valid number.");
+                }
+            });
+        } else {
+            showAlert(Alert.AlertType.WARNING, "No Selection", "Please select an item to update.");
         }
     }
 
     @FXML
-    public void handleBackToBookstore() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/BookStore.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) backButton.getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
+    private void handleRemoveItem() {
+        CartItem selectedItem = cartTableView.getSelectionModel().getSelectedItem();
+        if (selectedItem != null) {
+            cart.removeItem(selectedItem.getBook());
+            cartItems.remove(selectedItem);
+            updateTotalCost();
+        } else {
+            showAlert(Alert.AlertType.WARNING, "No Selection", "Please select an item to remove.");
         }
+    }
+
+    @FXML
+    private void handleCheckout() {
+        // Logic for checkout, could involve navigating to a payment page
+        showAlert(Alert.AlertType.INFORMATION, "Checkout", "Proceeding to checkout...");
+    }
+
+    private void showAlert(Alert.AlertType alertType, String title, String message) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

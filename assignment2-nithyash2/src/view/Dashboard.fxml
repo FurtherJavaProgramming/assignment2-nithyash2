@@ -19,6 +19,7 @@
             <Button text="Profile" onAction="#handleProfile" />
             <Button text="Orders" onAction="#handleOrders" />
             <Button text="Settings" onAction="#handleSettings" />
+            <Button text="Shopping Cart" onAction="#handleViewCart" />
         </VBox>
     </left>
 
