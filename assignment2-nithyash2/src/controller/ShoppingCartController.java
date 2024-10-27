@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import model.CartItem;
 import model.ShoppingCart;
+import model.Database;
 import model.User;
 
 public class ShoppingCartController {
@@ -29,17 +30,22 @@ public class ShoppingCartController {
 
     @FXML
     public void initialize() {
-        loadCartItems();
+        loadCartItemsFromDatabase();
         updateTotalCost();
     }
 
-    private void loadCartItems() {
+    private void loadCartItemsFromDatabase() {
+        // Load items directly from the database for the current user
+        cart.loadItemsFromDatabase(currentUser.getUsername());
         cartItems = FXCollections.observableArrayList(cart.getItems());
 
         titleColumn.setCellValueFactory(cellData -> cellData.getValue().getBook().titleProperty());
         quantityColumn.setCellValueFactory(cellData -> cellData.getValue().quantityProperty().asObject());
         priceColumn.setCellValueFactory(cellData -> cellData.getValue().getBook().priceProperty().asObject());
-        totalColumn.setCellValueFactory(cellData -> cellData.getValue().totalCostProperty().asObject());
+        totalColumn.setCellValueFactory(cellData -> {
+            double totalCost = cellData.getValue().getBook().getPrice() * cellData.getValue().getQuantity();
+            return new javafx.beans.property.SimpleDoubleProperty(totalCost).asObject();
+        });
 
         cartTableView.setItems(cartItems);
     }
@@ -48,6 +54,8 @@ public class ShoppingCartController {
         double totalCost = cart.getTotalCost();
         totalCostLabel.setText(String.format("$%.2f", totalCost));
     }
+
+
 
     @FXML
     private void handleUpdateQuantity() {
@@ -61,8 +69,11 @@ public class ShoppingCartController {
             dialog.showAndWait().ifPresent(quantityStr -> {
                 try {
                     int quantity = Integer.parseInt(quantityStr);
-                    if (quantity > 0 && quantity <= selectedItem.getBook().getStock()) {
-                        cart.updateItemQuantity(currentUser.getUsername(), selectedItem, quantity); // Updated call
+                    String title = selectedItem.getBook().getTitle();
+
+                    // Check against real-time stock from the database
+                    if (quantity > 0 && Database.checkBookStock(title, quantity)) {
+                        cart.updateItemQuantity(currentUser.getUsername(), selectedItem, quantity); // Update cart
                         cartTableView.refresh();
                         updateTotalCost();
                     } else {
@@ -77,11 +88,12 @@ public class ShoppingCartController {
         }
     }
 
+
     @FXML
     private void handleRemoveItem() {
         CartItem selectedItem = cartTableView.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
-            cart.removeItem(currentUser.getUsername(), selectedItem.getBook()); // Updated call
+            cart.removeItem(currentUser.getUsername(), selectedItem.getBook());
             cartItems.remove(selectedItem);
             updateTotalCost();
         } else {

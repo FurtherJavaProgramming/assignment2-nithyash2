@@ -1,0 +1,33 @@
+<!-- Checkout.fxml -->
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="controller.CheckoutController" spacing="10" alignment="CENTER" style="-fx-padding: 20;">
+    <Label text="Checkout" style="-fx-font-size: 20px; -fx-font-weight: bold;" />
+
+    <!-- Total Price Display -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Total Price:" />
+        <Label fx:id="totalPriceLabel" text="$0.00" style="-fx-font-weight: bold;" />
+    </HBox>
+
+    <!-- Credit Card Information -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Credit Card Number:" />
+        <TextField fx:id="cardNumberField" promptText="Enter 16-digit card number" />
+    </HBox>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Expiry Date (MM/YY):" />
+        <TextField fx:id="expiryDateField" promptText="MM/YY" />
+    </HBox>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="CVV:" />
+        <TextField fx:id="cvvField" promptText="3 digits" />
+    </HBox>
+
+    <!-- Confirm Button -->
+    <Button text="Confirm Order" onAction="#handleConfirmOrder" style="-fx-font-weight: bold; -fx-background-color: #4CAF50; -fx-text-fill: white;" />
+</VBox>

@@ -5,6 +5,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
+
 public class Database {
 
     private static final String URL = "jdbc:sqlite:./databases/your_database.db";
@@ -14,7 +17,7 @@ public class Database {
         if (!databaseDir.exists()) {
             databaseDir.mkdirs();
         }
-        createTables();  // Ensure tables are created on initialization
+        createTables();
     }
 
     // Establish connection with the database
@@ -61,72 +64,46 @@ public class Database {
             stmt.execute(createCartTable);
             stmt.execute(createBooksTable);
             System.out.println("Tables created or already exist.");
+            insertInitialBookData();  // Insert initial data if the books table is empty
         } catch (SQLException e) {
             System.out.println("Error creating tables: " + e.getMessage());
         }
     }
 
-    // Fetch all books for admin view
-    public static List<Book> getAllBooks() {
-        List<Book> books = new ArrayList<>();
-        String sql = "SELECT title, author, price, stock, sold_copies FROM books";
-
+    // Insert initial book data if the table is empty
+    public static void insertInitialBookData() {
+        String checkBooksTable = "SELECT COUNT(*) AS total FROM books";
         try (Connection conn = connect();
              Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+             ResultSet rs = stmt.executeQuery(checkBooksTable)) {
 
-            while (rs.next()) {
-                String title = rs.getString("title");
-                String author = rs.getString("author");
-                double price = rs.getDouble("price");
-                int stock = rs.getInt("stock");
-                int soldCopies = rs.getInt("sold_copies");
-
-                Book book = new Book(title, author, price, stock);
-                book.setSoldCopies(soldCopies);
-                books.add(book);
+            // Check if the table is empty
+            if (rs.next() && rs.getInt("total") == 0) {
+                // Insert initial data
+                String insertBooks = """
+                        INSERT INTO books (title, author, price, stock, sold_copies) VALUES
+                        ('Absolute Java', 'Savitch', 50.0, 10, 0),
+                        ('Java: How to Program', 'Deitel and Deitel', 70.0, 100, 0),
+                        ('Computing Concepts with JAVA 8 Essentials', 'Horstman', 89.0, 500, 0),
+                        ('Java Software Solutions', 'Lewis and Loftus', 99.0, 500, 0),
+                        ('Java Program Design', 'Cohoon and Davidson', 29.0, 2, 0),
+                        ('Clean Code', 'Robert Martin', 45.0, 100, 0),
+                        ('Gray Hat C#', 'Brandon Perry', 68.0, 300, 0),
+                        ('Python Basics', 'David Amos', 49.0, 1000, 0),
+                        ('Bayesian Statistics The Fun Way', 'Will Kurt', 42.0, 600, 0);
+                        """;
+                stmt.executeUpdate(insertBooks);
+                System.out.println("Initial book data inserted into books table.");
+            } else {
+                System.out.println("Books table already contains data; no insertions made.");
             }
         } catch (SQLException e) {
-            System.out.println("Error fetching books: " + e.getMessage());
-        }
-
-        return books;
-    }
-
-    // Update stock of a specific book
-    public static void updateBookStock(String title, int newStock) {
-        String sql = "UPDATE books SET stock = ? WHERE title = ?";
-
-        try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setInt(1, newStock);
-            pstmt.setString(2, title);
-            pstmt.executeUpdate();
-            System.out.println("Updated stock for book: " + title);
-        } catch (SQLException e) {
-            System.out.println("Error updating book stock: " + e.getMessage());
+            System.out.println("Error inserting initial book data: " + e.getMessage());
         }
     }
 
-    // Check if a book has sufficient stock for the requested quantity
-    public static boolean checkBookStock(String title, int quantity) {
-        String sql = "SELECT stock FROM books WHERE title = ?";
-        try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+    // Other methods (saveCartItem, loadCartItems, etc.) remain the same...
 
-            pstmt.setString(1, title);
-            ResultSet rs = pstmt.executeQuery();
-
-            if (rs.next()) {
-                int stock = rs.getInt("stock");
-                return stock >= quantity;
-            }
-        } catch (SQLException e) {
-            System.out.println("Error checking book stock: " + e.getMessage());
-        }
-        return false;
-    }
 
     // Save or update a cart item in the database
     public static void saveCartItem(String username, Book book, int quantity) {
@@ -140,7 +117,7 @@ public class Database {
             pstmt.setString(2, book.getTitle());
             pstmt.setInt(3, quantity);
             pstmt.setDouble(4, book.getPrice());
-            pstmt.setInt(5, quantity);  // Update quantity if the item already exists
+            pstmt.setInt(5, quantity); // Update quantity if the item already exists
 
             pstmt.executeUpdate();
             System.out.println("Cart item saved/updated for user: " + username);
@@ -188,6 +165,37 @@ public class Database {
             System.out.println("User " + username + " added to the database.");
         } catch (SQLException e) {
             System.out.println("Error adding user: " + e.getMessage());
+        }
+    }
+
+    public static boolean checkBookStock(String title, int requestedQuantity) {
+        String sql = "SELECT stock FROM books WHERE title = ?";
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, title);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                int availableStock = rs.getInt("stock");
+                return availableStock >= requestedQuantity;
+            }
+        } catch (SQLException e) {
+            System.out.println("Error checking book stock: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public static void updateBookStock(String title, int newStock) {
+        String sql = "UPDATE books SET stock = ? WHERE title = ?";
+
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, newStock);
+            pstmt.setString(2, title);
+            pstmt.executeUpdate();
+            System.out.println("Updated stock for book: " + title);
+        } catch (SQLException e) {
+            System.out.println("Error updating book stock: " + e.getMessage());
         }
     }
 }
