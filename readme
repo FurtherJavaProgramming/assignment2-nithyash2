@@ -1,1 +1,15 @@
-hello 
+Project Overview
+The Reading Room is a Java-based application designed to manage user authentication and enable users to interact with an online bookstore. This application features a secure login and signup system, allowing users to access a personalized dashboard and view available books. The project also includes an admin dashboard for managing books and users, leveraging a graphical user interface built with JavaFX and a backend database for persistent data storage. Additionally, unit tests ensure key functionalities are reliable and accurate.
+
+Technologies Used
+Java - Core programming language used to build the application.
+JavaFX - Used for building the graphical user interface, providing an interactive experience for users.
+SQLite - A lightweight, embedded database to store user data and book information persistently.
+JUnit - Framework used for writing and running unit tests, ensuring code reliability and correctness.
+Maven - Dependency management and build automation tool, used to streamline project setup and manage dependencies.
+
+Testing
+This project includes unit tests focused on the User class, ensuring the reliability of core functionalities such as user authentication,
+signup, and data validation. The tests validate proper handling of user credentials, including both standard users and admin accounts,
+as well as email format validation. JUnit has been used as the testing framework to verify expected behaviors and identify potential
+issues,supporting robust development practices.
