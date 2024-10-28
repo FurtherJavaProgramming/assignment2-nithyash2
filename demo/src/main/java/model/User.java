@@ -30,6 +30,12 @@ public class User {
 
     // Sign up method to add user to the database
     public void signUp(String username, String email, String password, String firstName, String lastName) {
+        // Check if the email or username is already registered
+        if (isEmailRegistered(email) || isUsernameRegistered(username)) {
+            System.out.println("Error: Email or username is already registered.");
+            return; // Exit without adding the user
+        }
+
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email.toLowerCase(); // Convert email to lowercase
@@ -49,6 +55,34 @@ public class User {
             System.out.println("User " + username + " added to the database.");
         } catch (SQLException e) {
             System.out.println("Error adding user: " + e.getMessage());
+        }
+    }
+
+    // Helper method to check if email is already registered
+    private boolean isEmailRegistered(String email) {
+        String sql = "SELECT email FROM users WHERE email = ?";
+        try (Connection conn = Database.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, email.toLowerCase());
+            ResultSet rs = pstmt.executeQuery();
+            return rs.next();  // Returns true if email is found
+        } catch (SQLException e) {
+            System.out.println("Error checking email: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Helper method to check if username is already registered
+    private boolean isUsernameRegistered(String username) {
+        String sql = "SELECT username FROM users WHERE username = ?";
+        try (Connection conn = Database.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            return rs.next();  // Returns true if username is found
+        } catch (SQLException e) {
+            System.out.println("Error checking username: " + e.getMessage());
+            return false;
         }
     }
 
@@ -122,8 +156,6 @@ public class User {
         }
         this.email = email.toLowerCase(); // Normalize email to lowercase
     }
-
-
 
     public String getUsername() {
         return username;

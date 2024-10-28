@@ -30,11 +30,9 @@
    <!-- Message Label for Login Status -->
    <Label fx:id="messageLabel" GridPane.columnIndex="4" GridPane.rowIndex="15" GridPane.vgrow="ALWAYS" />
 
-   <!-- Remember Me Checkbox -->
-   <CheckBox fx:id="remembermecheckbox" mnemonicParsing="false" text="Remember Me" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="13" GridPane.valignment="CENTER" />
 
    <!-- Forgot Password Hyperlink -->
-   <Hyperlink fx:id="forgotPasswordLink" onAction="#handleForgotPasswordAction" text="Forgot Password" GridPane.columnIndex="4" GridPane.halignment="LEFT" GridPane.rowIndex="15" />
+   <Hyperlink fx:id="forgotPasswordLink" onAction="#handleForgotPasswordAction" text="Forgot Password" GridPane.columnIndex="4" GridPane.halignment="LEFT" GridPane.rowIndex="14" />
 
    <!-- Label Message (Optional) -->
    <Label fx:id="labelMessage" text="Label" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="16" GridPane.valignment="BASELINE" />
