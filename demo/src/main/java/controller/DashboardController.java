@@ -102,7 +102,7 @@ public class DashboardController {
     @FXML
     public void handleProfile() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Profile.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/profile.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) dashboardPane.getScene().getWindow();
             Scene scene = new Scene(root);

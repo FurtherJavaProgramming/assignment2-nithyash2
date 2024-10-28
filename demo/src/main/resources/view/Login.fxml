@@ -46,9 +46,6 @@
       </padding>
    </Button>
 
-
-
-
    <!-- Column and Row Constraints -->
    <columnConstraints>
       <ColumnConstraints />

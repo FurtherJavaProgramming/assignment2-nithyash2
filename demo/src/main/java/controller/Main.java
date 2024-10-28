@@ -5,7 +5,7 @@ import javafx.stage.Stage;
 import model.Database;  // Import the Database class
 import view.LoginView;
 
-public class main extends Application {
+public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {

@@ -117,8 +117,13 @@ public class User {
     }
 
     public void setEmail(String email) {
+        if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            throw new IllegalArgumentException("Invalid email format");
+        }
         this.email = email.toLowerCase(); // Normalize email to lowercase
     }
+
+
 
     public String getUsername() {
         return username;

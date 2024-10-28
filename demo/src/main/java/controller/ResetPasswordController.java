@@ -68,7 +68,7 @@ public class ResetPasswordController {
     @FXML
     public void handleGoBack() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/login.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Login.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) newPasswordField.getScene().getWindow();
             Scene scene = new Scene(root);
