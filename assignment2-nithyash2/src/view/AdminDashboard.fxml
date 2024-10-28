@@ -9,7 +9,10 @@
 
 <BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="controller.AdminDashboardController">
     <top>
-        <Label text="Welcome, Admin!" style="-fx-font-size: 18px;" />
+        <HBox spacing="20" alignment="CENTER_LEFT">
+            <Label text="Welcome, Admin!" style="-fx-font-size: 18px;" />
+            <Button text="Logout" fx:id="logoutButton" onAction="#handleLogout" />
+        </HBox>
     </top>
     <center>
         <TableView fx:id="bookTableView">
@@ -23,7 +26,7 @@
         </TableView>
     </center>
     <bottom>
-        <HBox spacing="10">
+        <HBox spacing="10" alignment="CENTER">
             <Label text="Adjust Stock:" />
             <TextField fx:id="stockAdjustmentField" promptText="Enter new stock" />
             <Button text="Increase Stock" onAction="#handleIncreaseStock" />

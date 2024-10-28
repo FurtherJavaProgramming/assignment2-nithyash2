@@ -4,9 +4,7 @@ import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-
-
-
+import java.time.LocalDateTime;
 
 public class Database {
 
@@ -32,37 +30,54 @@ public class Database {
         return conn;
     }
 
-    // Create necessary tables for users, books, and cart items if they don’t exist
+    // Create necessary tables if they don’t exist
     public static void createTables() {
-        String createUsersTable = "CREATE TABLE IF NOT EXISTS users ("
-                + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + "username TEXT NOT NULL UNIQUE, "
-                + "email TEXT NOT NULL UNIQUE, "
-                + "password TEXT NOT NULL, "
-                + "first_name TEXT, "
-                + "last_name TEXT);";
+        String createUsersTable = "CREATE TABLE IF NOT EXISTS users (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "username TEXT NOT NULL UNIQUE, " +
+                "email TEXT NOT NULL UNIQUE, " +
+                "password TEXT NOT NULL, " +
+                "first_name TEXT, " +
+                "last_name TEXT);";
 
-        String createCartTable = "CREATE TABLE IF NOT EXISTS cart_items ("
-                + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + "username TEXT NOT NULL, "
-                + "book_title TEXT NOT NULL, "
-                + "quantity INTEGER NOT NULL, "
-                + "price REAL NOT NULL, "
-                + "UNIQUE(username, book_title), "
-                + "FOREIGN KEY(username) REFERENCES users(username));";
+        String createCartTable = "CREATE TABLE IF NOT EXISTS cart_items (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "username TEXT NOT NULL, " +
+                "book_title TEXT NOT NULL, " +
+                "quantity INTEGER NOT NULL, " +
+                "price REAL NOT NULL, " +
+                "UNIQUE(username, book_title), " +
+                "FOREIGN KEY(username) REFERENCES users(username));";
 
-        String createBooksTable = "CREATE TABLE IF NOT EXISTS books ("
-                + "title TEXT PRIMARY KEY, "
-                + "author TEXT, "
-                + "price REAL NOT NULL, "
-                + "stock INTEGER NOT NULL, "
-                + "sold_copies INTEGER DEFAULT 0);";
+        String createBooksTable = "CREATE TABLE IF NOT EXISTS books (" +
+                "title TEXT PRIMARY KEY, " +
+                "author TEXT, " +
+                "price REAL NOT NULL, " +
+                "stock INTEGER NOT NULL, " +
+                "sold_copies INTEGER DEFAULT 0);";
 
-        try (Connection conn = connect();
-             Statement stmt = conn.createStatement()) {
+        String createOrdersTable = "CREATE TABLE IF NOT EXISTS orders (" +
+                "order_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "username TEXT NOT NULL, " +
+                "order_date TEXT NOT NULL, " +
+                "total_price REAL NOT NULL, " +
+                "FOREIGN KEY(username) REFERENCES users(username));";
+
+        String createOrderItemsTable = "CREATE TABLE IF NOT EXISTS order_items (" +
+                "order_item_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "order_id INTEGER NOT NULL, " +
+                "book_title TEXT NOT NULL, " +
+                "quantity INTEGER NOT NULL, " +
+                "price REAL NOT NULL, " +
+                "FOREIGN KEY(order_id) REFERENCES orders(order_id), " +
+                "FOREIGN KEY(book_title) REFERENCES books(title));";
+
+        try (Connection conn = connect(); Statement stmt = conn.createStatement()) {
             stmt.execute(createUsersTable);
             stmt.execute(createCartTable);
             stmt.execute(createBooksTable);
+            stmt.execute(createOrdersTable);
+            stmt.execute(createOrderItemsTable);
             System.out.println("Tables created or already exist.");
             insertInitialBookData();  // Insert initial data if the books table is empty
         } catch (SQLException e) {
@@ -73,13 +88,9 @@ public class Database {
     // Insert initial book data if the table is empty
     public static void insertInitialBookData() {
         String checkBooksTable = "SELECT COUNT(*) AS total FROM books";
-        try (Connection conn = connect();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(checkBooksTable)) {
+        try (Connection conn = connect(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(checkBooksTable)) {
 
-            // Check if the table is empty
             if (rs.next() && rs.getInt("total") == 0) {
-                // Insert initial data
                 String insertBooks = """
                         INSERT INTO books (title, author, price, stock, sold_copies) VALUES
                         ('Absolute Java', 'Savitch', 50.0, 10, 0),
@@ -102,10 +113,67 @@ public class Database {
         }
     }
 
-    // Other methods (saveCartItem, loadCartItems, etc.) remain the same...
+    // Save an order in the database
+    public static int saveOrder(String username, double totalPrice) {
+        String sql = "INSERT INTO orders (username, order_date, total_price) VALUES (?, datetime('now'), ?)";
+        try (Connection conn = connect(); PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1, username);
+            pstmt.setDouble(2, totalPrice);
+            pstmt.executeUpdate();
+            ResultSet rs = pstmt.getGeneratedKeys();
+            if (rs.next()) {
+                return rs.getInt(1); // Return generated order_id
+            }
+        } catch (SQLException e) {
+            System.out.println("Error saving order: " + e.getMessage());
+        }
+        return -1;
+    }
+
+    // Save order items in the database
+    public static void saveOrderItems(int orderId, List<CartItem> items) {
+        String sql = "INSERT INTO order_items (order_id, book_title, quantity, price) VALUES (?, ?, ?, ?)";
+        try (Connection conn = connect(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            for (CartItem item : items) {
+                pstmt.setInt(1, orderId);
+                pstmt.setString(2, item.getBook().getTitle());
+                pstmt.setInt(3, item.getQuantity());
+                pstmt.setDouble(4, item.getBook().getPrice());
+                pstmt.addBatch();
+            }
+            pstmt.executeBatch();
+            System.out.println("Order items saved for order ID: " + orderId);
+        } catch (SQLException e) {
+            System.out.println("Error saving order items: " + e.getMessage());
+        }
+    }
+
+    // Retrieve all orders for a user
+    public static List<Order> getAllOrders(String username) {
+        List<Order> orders = new ArrayList<>();
+        String sql = "SELECT * FROM orders WHERE username = ? ORDER BY order_date DESC";
+        try (Connection conn = connect(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                int orderId = rs.getInt("order_id");
+                LocalDateTime orderDate = LocalDateTime.parse(rs.getString("order_date"));
+                double totalPrice = rs.getDouble("total_price");
+
+                // Retrieve the items for the order
+                List<OrderItem> items = OrderItem.getItemsForOrder(orderId);
+                // Use the correct constructor
+                orders.add(new Order(orderId, username, items, totalPrice, orderDate));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error retrieving orders: " + e.getMessage());
+        }
+        return orders;
+    }
+
+    // Retrieve all orders for a user
 
 
-    // Save or update a cart item in the database
     public static void saveCartItem(String username, Book book, int quantity) {
         String sql = "INSERT INTO cart_items (username, book_title, quantity, price) VALUES (?, ?, ?, ?) "
                 + "ON CONFLICT(username, book_title) DO UPDATE SET quantity = ?";
@@ -198,4 +266,6 @@ public class Database {
             System.out.println("Error updating book stock: " + e.getMessage());
         }
     }
+
+
 }

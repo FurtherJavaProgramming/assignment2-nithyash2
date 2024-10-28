@@ -2,87 +2,101 @@ package controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import model.ShoppingCart;
+import javafx.scene.text.Text;
+import javafx.scene.control.ButtonType;
 import model.Order;
+import model.OrderItem;
+import model.ShoppingCart;
+import model.User;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class CheckoutController {
 
     @FXML
-    private Label totalPriceLabel;
+    private Text totalPrice;  // Display for total price
+
     @FXML
     private TextField cardNumberField;
+
     @FXML
     private TextField expiryDateField;
+
     @FXML
     private TextField cvvField;
 
     private final ShoppingCart cart = ShoppingCart.getInstance();
+    private final User currentUser = User.getInstance();
 
     @FXML
     public void initialize() {
-        // Display the total price of items in the cart
-        double totalPrice = cart.getTotalCost();
-        totalPriceLabel.setText(String.format("$%.2f", totalPrice));
+        // Display the total price in the Text field
+        totalPrice.setText(String.format("$%.2f", cart.getTotalCost()));
     }
 
     @FXML
-    private void handleConfirmOrder() {
-        // Validate payment details
-        if (validatePaymentDetails()) {
-            // Proceed with order placement
-            processOrder();
-            showAlert(Alert.AlertType.INFORMATION, "Order Confirmed", "Your order has been placed successfully.");
+    private void handleCheckout() {
+        // Confirm the total price with the user
+        if (!confirmOrder()) {
+            return;
+        }
+
+        // Collect and validate payment information
+        String cardNumber = cardNumberField.getText();
+        String expiryDate = expiryDateField.getText();
+        String cvv = cvvField.getText();
+
+        if (!validatePaymentInfo(cardNumber, expiryDate, cvv)) {
+            showAlert(Alert.AlertType.ERROR, "Invalid Payment Info", "Please check your payment details and try again.");
+            return;
+        }
+
+        // Process the order
+        List<OrderItem> orderItems = cart.getItems().stream()
+                .map(cartItem -> new OrderItem(cartItem.getBook().getTitle(), cartItem.getQuantity(), cartItem.getBook().getPrice()))
+                .collect(Collectors.toList());
+
+        double totalPriceValue = cart.getTotalCost();
+        Order order = new Order(currentUser.getUsername(), orderItems, totalPriceValue);
+        int orderId = order.saveOrder();  // Assume saveOrder generates and returns a unique order ID
+
+        if (orderId != -1) {
+            showAlert(Alert.AlertType.INFORMATION, "Order Successful", "Your order has been placed with Order ID: " + orderId);
+            cart.clearCart();
+            clearPaymentFields();
+        } else {
+            showAlert(Alert.AlertType.ERROR, "Order Failed", "There was an issue placing your order. Please try again.");
         }
     }
 
-    private boolean validatePaymentDetails() {
-        // Validate card number
-        String cardNumber = cardNumberField.getText().trim();
-        if (cardNumber.length() != 16 || !cardNumber.matches("\\d+")) {
-            showAlert(Alert.AlertType.ERROR, "Invalid Card Number", "Please enter a 16-digit credit card number.");
-            return false;
-        }
+    private boolean confirmOrder() {
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION, "Your total is " + totalPrice.getText() + ". Do you want to proceed?");
+        confirmAlert.setTitle("Confirm Order");
 
-        // Validate expiry date
-        String expiryDate = expiryDateField.getText().trim();
-        if (!isValidExpiryDate(expiryDate)) {
-            showAlert(Alert.AlertType.ERROR, "Invalid Expiry Date", "Please enter a valid future expiry date (MM/YY).");
-            return false;
-        }
-
-        // Validate CVV
-        String cvv = cvvField.getText().trim();
-        if (cvv.length() != 3 || !cvv.matches("\\d{3}")) {
-            showAlert(Alert.AlertType.ERROR, "Invalid CVV", "Please enter a 3-digit CVV.");
-            return false;
-        }
-
-        return true;  // All validations passed
+        Optional<ButtonType> result = confirmAlert.showAndWait();
+        return result.isPresent() && result.get() == ButtonType.OK;
     }
 
-    private boolean isValidExpiryDate(String expiryDate) {
+    private boolean validatePaymentInfo(String cardNumber, String expiryDate, String cvv) {
+        return cardNumber.matches("\\d{16}") &&
+                validateExpiryDate(expiryDate) &&
+                cvv.matches("\\d{3}");
+    }
+
+    private boolean validateExpiryDate(String expiryDate) {
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yy");
-            LocalDate enteredDate = LocalDate.parse("01/" + expiryDate, DateTimeFormatter.ofPattern("dd/MM/yy"));
-            return enteredDate.isAfter(LocalDate.now());
+            LocalDate expDate = LocalDate.parse("01/" + expiryDate, DateTimeFormatter.ofPattern("dd/MM/yy"));
+            return expDate.isAfter(LocalDate.now());
         } catch (DateTimeParseException e) {
             return false;
         }
-    }
-
-    private void processOrder() {
-        // Deduct stock for each book in the cart and mark the order in the database
-        Order order = new Order(cart.getItems(), cart.getTotalCost());
-        order.save();  // Assumes Order class has save() method to record details in the database
-
-        // Clear the cart after successful order
-        cart.clearCart();
     }
 
     private void showAlert(Alert.AlertType alertType, String title, String message) {
@@ -90,5 +104,11 @@ public class CheckoutController {
         alert.setTitle(title);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void clearPaymentFields() {
+        cardNumberField.clear();
+        expiryDateField.clear();
+        cvvField.clear();
     }
 }

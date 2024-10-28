@@ -112,11 +112,21 @@ public class DashboardController {
             e.printStackTrace();
         }
     }
-
     @FXML
     public void handleOrders() {
-        System.out.println("Navigating to Orders page...");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/OrderView.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) dashboardPane.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            System.out.println("Error loading Orders page: " + e.getMessage());
+        }
     }
+
+
+
 
     @FXML
     public void handleSettings() {

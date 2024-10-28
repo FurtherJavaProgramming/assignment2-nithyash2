@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.OrderController">
+    <children>
+        <!-- Order History TableView -->
+        <VBox spacing="10" layoutX="20" layoutY="20">
+            <Label text="Order History" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+            <TableView fx:id="orderTableView" prefHeight="200">
+                <columns>
+                    <TableColumn fx:id="orderIdColumn" text="Order ID" prefWidth="100"/>
+                    <TableColumn fx:id="orderDateColumn" text="Order Date" prefWidth="200"/>
+                    <TableColumn fx:id="totalPriceColumn" text="Total Price" prefWidth="100"/>
+                </columns>
+            </TableView>
+
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button text="Export Selected" onAction="#handleExportOrders"/>
+                <Button text="Back to Dashboard" onAction="#handleBackToDashboard"/>
+            </HBox>
+
+            <!-- Order Details Section -->
+            <Label text="Order Details" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+            <TableView fx:id="orderItemsTable" prefHeight="150">
+                <columns>
+                    <TableColumn fx:id="bookTitleColumn" text="Book Title" prefWidth="200"/>
+                    <TableColumn fx:id="quantityColumn" text="Quantity" prefWidth="100"/>
+                    <TableColumn fx:id="priceColumn" text="Price" prefWidth="100"/>
+                    <TableColumn fx:id="totalColumn" text="Total" prefWidth="100"/>
+                </columns>
+            </TableView>
+
+            <HBox spacing="10">
+                <Label text="Selected Order Total:"/>
+                <Label fx:id="selectedOrderTotalLabel"  style="-fx-font-weight: bold;"/>
+            </HBox>
+        </VBox>
+    </children>
+</AnchorPane>

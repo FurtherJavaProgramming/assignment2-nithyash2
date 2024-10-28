@@ -7,7 +7,16 @@ import javafx.scene.control.*;
 import model.CartItem;
 import model.ShoppingCart;
 import model.Database;
+import javafx.scene.control.Button;
 import model.User;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import java.io.IOException;
+import java.io.File;
+
+
 
 public class ShoppingCartController {
 
@@ -23,6 +32,8 @@ public class ShoppingCartController {
     private TableColumn<CartItem, Double> totalColumn;
     @FXML
     private Label totalCostLabel;
+    @FXML
+    private Button proceedToCheckoutButton;
 
     private final ShoppingCart cart = ShoppingCart.getInstance();
     private final User currentUser = User.getInstance();
@@ -102,10 +113,20 @@ public class ShoppingCartController {
     }
 
     @FXML
-    private void handleCheckout() {
-        showAlert(Alert.AlertType.INFORMATION, "Checkout", "Proceeding to checkout...");
-        // Additional checkout logic here
+    private void proceedToCheckout() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Checkout.fxml"));
+            Parent checkoutPage = loader.load();
+            Stage stage = (Stage) proceedToCheckoutButton.getScene().getWindow();
+            stage.setScene(new Scene(checkoutPage));
+        } catch (IOException e) {
+            System.out.println("Error loading Checkout page: " + e.getMessage());
+        }
     }
+
+
+
+
 
     private void showAlert(Alert.AlertType alertType, String title, String message) {
         Alert alert = new Alert(alertType);

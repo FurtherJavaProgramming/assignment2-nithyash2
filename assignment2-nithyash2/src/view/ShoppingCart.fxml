@@ -25,7 +25,7 @@
             <Label fx:id="totalCostLabel" text="0.0" />
             <Button text="Update Quantity" onAction="#handleUpdateQuantity" />
             <Button text="Remove Selected Item" onAction="#handleRemoveItem" />
-            <Button text="Proceed to Checkout" onAction="#handleCheckout" />
+            <Button fx:id="proceedToCheckoutButton" text="Proceed to Checkout" onAction="#proceedToCheckout" />
         </HBox>
     </bottom>
 </BorderPane>

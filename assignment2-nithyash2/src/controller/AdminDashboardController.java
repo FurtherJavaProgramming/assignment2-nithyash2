@@ -3,10 +3,15 @@ package controller;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.stage.Stage;
 import model.Book;
 import model.BookStore;
 import model.Database;
+import java.io.IOException;
 
 public class AdminDashboardController {
 
@@ -25,20 +30,34 @@ public class AdminDashboardController {
     @FXML
     private TextField stockAdjustmentField;
 
+    @FXML
+    private Button logoutButton;  // Add reference to the Logout button
+
     private ObservableList<Book> books;
 
     @FXML
     public void initialize() {
-        // Initialize the columns in the TableView
         titleColumn.setCellValueFactory(cellData -> cellData.getValue().titleProperty());
         authorColumn.setCellValueFactory(cellData -> cellData.getValue().authorProperty());
         priceColumn.setCellValueFactory(cellData -> cellData.getValue().priceProperty().asObject());
         soldCopiesColumn.setCellValueFactory(cellData -> cellData.getValue().soldCopiesProperty().asObject());
         stockColumn.setCellValueFactory(cellData -> cellData.getValue().stockProperty().asObject());
 
-        // Load books from the BookStore
         books = FXCollections.observableArrayList(BookStore.getInstance().getBooks());
         bookTableView.setItems(books);
+    }
+
+    @FXML
+    private void handleLogout() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Login.fxml"));
+            Parent loginPage = loader.load();
+            Stage stage = (Stage) logoutButton.getScene().getWindow();
+            stage.setScene(new Scene(loginPage));
+            stage.show();
+        } catch (IOException e) {
+            System.out.println("Error loading Login page: " + e.getMessage());
+        }
     }
 
     @FXML
@@ -49,8 +68,8 @@ public class AdminDashboardController {
                 int adjustment = Integer.parseInt(stockAdjustmentField.getText());
                 if (adjustment > 0) {
                     int newStock = selectedBook.getStock() + adjustment;
-                    selectedBook.setStock(newStock);  // Update local object
-                    Database.updateBookStock(selectedBook.getTitle(), newStock);  // Update in DB
+                    selectedBook.setStock(newStock);
+                    Database.updateBookStock(selectedBook.getTitle(), newStock);
                     bookTableView.refresh();
                 } else {
                     showAlert("Enter a positive number.");
@@ -69,8 +88,8 @@ public class AdminDashboardController {
                 int adjustment = Integer.parseInt(stockAdjustmentField.getText());
                 if (adjustment > 0 && selectedBook.getStock() - adjustment >= 0) {
                     int newStock = selectedBook.getStock() - adjustment;
-                    selectedBook.setStock(newStock);  // Update local object
-                    Database.updateBookStock(selectedBook.getTitle(), newStock);  // Update in DB
+                    selectedBook.setStock(newStock);
+                    Database.updateBookStock(selectedBook.getTitle(), newStock);
                     bookTableView.refresh();
                 } else {
                     showAlert("Invalid stock adjustment.");
