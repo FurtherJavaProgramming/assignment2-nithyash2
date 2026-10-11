@@ -226,13 +226,28 @@ public class Database {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, username);
             pstmt.setString(2, email);
-            pstmt.setString(3, password);
+            pstmt.setString(3, PasswordHasher.hash(password)); // Store a salted hash, never the plain password
             pstmt.setString(4, firstName);
             pstmt.setString(5, lastName);
             pstmt.executeUpdate();
             System.out.println("User " + username + " added to the database.");
         } catch (SQLException e) {
             System.out.println("Error adding user: " + e.getMessage());
+        }
+    }
+
+    // Hash and save a new password for a user (matched by username or email)
+    public static boolean updatePassword(String usernameOrEmail, String newPassword) {
+        String sql = "UPDATE users SET password = ? WHERE username = ? OR LOWER(email) = LOWER(?)";
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, PasswordHasher.hash(newPassword));
+            pstmt.setString(2, usernameOrEmail);
+            pstmt.setString(3, usernameOrEmail);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Error updating password: " + e.getMessage());
+            return false;
         }
     }
 

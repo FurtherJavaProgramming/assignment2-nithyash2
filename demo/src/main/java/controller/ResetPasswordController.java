@@ -8,9 +8,6 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import model.Database;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.io.IOException;
 
 public class ResetPasswordController {
@@ -43,24 +40,11 @@ public class ResetPasswordController {
             return;
         }
 
-        // Update the password in the database
-        try (Connection conn = Database.connect()) {
-            String sql = "UPDATE users SET password = ? WHERE username = ? OR email = ?";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, newPassword); // Consider hashing the password for security
-            pstmt.setString(2, usernameOrEmail);
-            pstmt.setString(3, usernameOrEmail);
-
-            int rowsUpdated = pstmt.executeUpdate();
-
-            if (rowsUpdated > 0) {
-                messageLabel.setText("Password reset successfully.");
-            } else {
-                messageLabel.setText("User not found.");
-            }
-        } catch (SQLException e) {
-            messageLabel.setText("Error updating password.");
-            e.printStackTrace();
+        // Hash and update the password in the database
+        if (Database.updatePassword(usernameOrEmail, newPassword)) {
+            messageLabel.setText("Password reset successfully.");
+        } else {
+            messageLabel.setText("User not found.");
         }
     }
 

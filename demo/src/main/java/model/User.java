@@ -40,7 +40,7 @@ public class User {
         this.lastName = lastName;
         this.email = email.toLowerCase(); // Convert email to lowercase
         this.username = username;
-        this.password = password;
+        this.password = null;   // Never keep the plain-text password in memory
         this.isAdmin = false;  // Default users are not admin
 
         String sql = "INSERT INTO users(username, email, password, first_name, last_name) VALUES(?, ?, ?, ?, ?)";
@@ -48,7 +48,7 @@ public class User {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, this.username);  // Store username
             pstmt.setString(2, this.email);     // Store email in lowercase
-            pstmt.setString(3, this.password);
+            pstmt.setString(3, PasswordHasher.hash(password)); // Store a salted hash, never the plain password
             pstmt.setString(4, this.firstName);
             pstmt.setString(5, this.lastName);
             pstmt.executeUpdate();
@@ -100,23 +100,35 @@ public class User {
             return true;
         }
 
-        // Check database for regular user credentials
-        String sql = "SELECT first_name, last_name, email, username, password FROM users WHERE (LOWER(email) = LOWER(?) OR username = ?) AND password = ?";
+        // Look up the user by email or username, then verify the password against the stored hash
+        String sql = "SELECT first_name, last_name, email, username, password FROM users WHERE LOWER(email) = LOWER(?) OR username = ?";
         try (Connection conn = Database.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, login.toLowerCase());  // Convert email to lowercase for case-insensitive validation
-            pstmt.setString(2, login);                // Check both email and username
-            pstmt.setString(3, password);
+            pstmt.setString(1, login.toLowerCase());  // Case-insensitive email match
+            pstmt.setString(2, login);                // Or exact username match
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                // Update the User instance with the logged-in user's data
-                this.firstName = rs.getString("first_name");
-                this.lastName = rs.getString("last_name");
-                this.email = rs.getString("email");
-                this.username = rs.getString("username");
-                this.password = rs.getString("password");
-                this.isAdmin = false; // Regular users are not admin
-                return true;
+                String stored = rs.getString("password");
+                boolean matches;
+                if (PasswordHasher.isHashed(stored)) {
+                    matches = PasswordHasher.verify(password, stored);
+                } else {
+                    // Older accounts stored plain text: accept once, then upgrade to a hash
+                    matches = stored != null && stored.equals(password);
+                    if (matches) {
+                        Database.updatePassword(rs.getString("username"), password);
+                    }
+                }
+                if (matches) {
+                    // Update the User instance with the logged-in user's data
+                    this.firstName = rs.getString("first_name");
+                    this.lastName = rs.getString("last_name");
+                    this.email = rs.getString("email");
+                    this.username = rs.getString("username");
+                    this.password = null; // Never keep the password in memory
+                    this.isAdmin = false; // Regular users are not admin
+                    return true;
+                }
             }
         } catch (SQLException e) {
             System.out.println("Error during login: " + e.getMessage());

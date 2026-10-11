@@ -4,9 +4,6 @@ module com.example.demo {
     requires org.controlsfx.controls;
     requires java.sql;  // Added to access java.sql package
 
-    opens com.example.demo to javafx.fxml;
-    exports com.example.demo;
-
     // Open and export other packages as needed
     opens controller to javafx.fxml;
     exports controller;
@@ -16,7 +13,5 @@ module com.example.demo {
 
     opens view to javafx.fxml;
     exports view;
-
-    // Export model package for test visibility
 
 }

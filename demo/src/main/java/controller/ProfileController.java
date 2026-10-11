@@ -71,24 +71,21 @@ public class ProfileController {
         // Update the profile in the database
         User user = User.getInstance();
         try (Connection conn = Database.connect()) {
-            String updateSql = "UPDATE users SET first_name = ?, last_name = ?, password = ? WHERE email = ?";
+            String updateSql = "UPDATE users SET first_name = ?, last_name = ? WHERE email = ?";
             PreparedStatement pstmt = conn.prepareStatement(updateSql);
             pstmt.setString(1, firstName);
             pstmt.setString(2, lastName);
-
-            // Use the new password if provided, otherwise keep the existing one
-            String passwordToSave = newPassword.isEmpty() ? user.getPassword() : newPassword;
-            pstmt.setString(3, passwordToSave);
-            pstmt.setString(4, user.getEmail());
-
+            pstmt.setString(3, user.getEmail());
             pstmt.executeUpdate();
+
+            // Only change the password if a new one was entered (stored as a salted hash)
+            if (!newPassword.isEmpty()) {
+                Database.updatePassword(user.getEmail(), newPassword);
+            }
 
             // Update the User singleton
             user.setFirstName(firstName);
             user.setLastName(lastName);
-            if (!newPassword.isEmpty()) {
-                user.setPassword(newPassword);
-            }
 
             messageLabel.setText("Profile updated successfully.");
         } catch (SQLException e) {

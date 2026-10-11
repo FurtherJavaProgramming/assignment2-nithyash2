@@ -7,12 +7,11 @@ import javafx.scene.text.Text;
 import javafx.scene.control.ButtonType;
 import model.Order;
 import model.OrderItem;
+import model.PaymentValidator;
 import model.ShoppingCart;
 import model.User;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -84,19 +83,7 @@ public class CheckoutController {
     }
 
     private boolean validatePaymentInfo(String cardNumber, String expiryDate, String cvv) {
-        return cardNumber.matches("\\d{16}") &&
-                validateExpiryDate(expiryDate) &&
-                cvv.matches("\\d{3}");
-    }
-
-    private boolean validateExpiryDate(String expiryDate) {
-        try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yy");
-            LocalDate expDate = LocalDate.parse("01/" + expiryDate, DateTimeFormatter.ofPattern("dd/MM/yy"));
-            return expDate.isAfter(LocalDate.now());
-        } catch (DateTimeParseException e) {
-            return false;
-        }
+        return PaymentValidator.isValid(cardNumber, expiryDate, cvv, LocalDate.now());
     }
 
     private void showAlert(Alert.AlertType alertType, String title, String message) {

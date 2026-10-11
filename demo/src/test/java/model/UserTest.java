@@ -1,6 +1,12 @@
-import model.User;
+package model;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserTest {
@@ -54,5 +60,24 @@ class UserTest {
         assertEquals("testUser", user.getUsername(), "Username should match the initialized value.");
         user.setUsername("newUser");
         assertEquals("newUser", user.getUsername(), "Username should be updated to the new value.");
+    }
+
+    // Passwords must be stored as salted hashes, never as plain text
+    @Test
+    void testPasswordIsStoredHashed() throws Exception {
+        String name = "hashUser" + System.nanoTime();
+        user.signUp(name, name + "@domain.com", "secret123", "Hash", "User");
+
+        try (Connection conn = Database.connect();
+             PreparedStatement pstmt = conn.prepareStatement("SELECT password FROM users WHERE username = ?")) {
+            pstmt.setString(1, name);
+            ResultSet rs = pstmt.executeQuery();
+            assertTrue(rs.next(), "User should be saved.");
+            String stored = rs.getString("password");
+            assertNotEquals("secret123", stored, "Password must not be stored as plain text.");
+            assertTrue(PasswordHasher.verify("secret123", stored), "Stored hash should match the password.");
+        }
+        assertTrue(user.validateCredentials(name, "secret123"));
+        assertFalse(user.validateCredentials(name, "wrong"));
     }
 }
